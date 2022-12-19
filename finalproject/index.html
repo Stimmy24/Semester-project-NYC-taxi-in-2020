@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+	<style> .btn{border:1px solid black; padding:5px;display:inline-block} </style>
+</head>
+<body>
+	<div class="container">
+		<h1>How Much Money Made in a Day</h1>
+		<p>The first graph shows the average tip, fare cost, and mileage for each trip in a taxi in a day. The second graph compliments the first graph by representing the total amount of money made in a 24 hour period</p>
+		<form>
+
+		<input type="button" value="Average Revenue Chart" id="btn_1">
+		<br>
+		<div id="output"></div>
+
+		<input type="button" value="Total Revenue Chart" id="btn_2">
+		<br>
+		<div id="output2"></div>
+
+		<input type="button" value="Average in 2020 vs 2019" id="btn_3">
+		<br>
+		<div id="output3"></div>
+		
+</body>
+<script>
+	
+
+// Some notes.  
+//
+// In this example we will explore the relationship between area and population
+// for the top 20 most populated countries.
+//
+// The data will be retreived from a Web Service found at this url:
+// https://restcountries.com/v3.1/all
+//  
+// To get the result we want, we can't just work with the data as it comes from the source.
+//
+// We need to first put the data we want into a new format.  It helps to throw away
+// the data attributes we don't need and keep only the ones that are useful.
+// 
+// To determine which of the 250 countries has the greatest population we'll take this
+// strategy: sort the data by population from highest to lowest, then inspect the first
+// 20 records.
+//
+// Sorting in JavaScript is tricky.  It's best to use a 2 dimensional array 
+// that is numerically indexed in both dimensions.
+//
+// This (with imaginary data) is the structure what we want:
+// [
+//	[99999999, 8888880, "The People's Country"]
+//	[9999999, 999999, "Free Landia"],
+//	[9999900, 99000, "Terra Nostra"],
+//	[9999700, 90000, "Oceana"],
+//	[9999600, 9000, "The Province of Sealand"],
+// ]
+//
+// In the example above "The People's Country" has the biggest population (99999999).
+// It also has the biggest land mass /area (8888880). To get the population
+// density of "The People's Country" you would divide the population by the area.
+//
+// Once we have the data, we will want to manipulate portions of the
+// URL to the image chart.
+//
+// The linebreaks have been added to the URL to make this it more readable.
+//
+/* 
+Original URL from image-charts testing
+
+https://image-charts.com/chart?
+chco=3072F3,ff0000&
+chd=a:10,20,40,80,90,95,99|20,30,40,50,60,70,80&
+chdl=Ponies|Unicorns&
+chdlp=t&
+chls=2,4,1&
+chs=700x500&
+cht=lc&
+chxt=x,y
+
+*/
+//
+// The URL we build is to be used as the src attribute 
+// of the HTML img tag.
+// 
+
+//Supporting Functions 
+
+function getTheData(){
+	console.log("Here we go get the data...");
+
+	//$("#output").html("<img src='https://picsum.photos/200'>"); //random image
+	$("#output").html("<b>hi there</b>");
+	$.getJSON('https://data.cityofnewyork.us/resource/kxp8-n2sj.json',function(result){
+		console.log(result)
+		
+		let newdata=[]
+		for(let i=0; i<result.length;i++){
+			let item=[]
+			item[0]=result[i]['tpep_pickup_datetime']
+			item[1]=item[0].slice(14,16);
+			item[2]=parseInt(item[1])
+			item[3]=result[i]['passenger_count'];
+			item[4]=parseInt(item[3]);
+			item[5]=result[i]['trip_distance'];
+			item[6]=parseInt(item[5]);
+			item[7]=result[i]["fare_amount"];
+			item[8]=parseInt(item[7]);
+			item[9]=result[i]['tip_amount'];
+			item[10]=parseInt(item[9]);
+			newdata[i]=item;
+		}
+		console.log(newdata)
+		newdata.sort(function(pos1,pos2){return pos1[1] - pos2[1]});
+		console.log(newdata.sort)
+		plotthechart(newdata);
+	
+	
+	})
+
+	}
+	function getTheData2(){
+	console.log("Here we go get the data...");
+
+	//$("#output").html("<img src='https://picsum.photos/200'>"); //random image
+	$("#output2").html("<b>hi there</b>");
+	$.getJSON('https://data.cityofnewyork.us/resource/kxp8-n2sj.json',function(result){
+		console.log(result)
+		
+		let newdata=[]
+		for(let i=0; i<result.length;i++){
+			let item=[]
+			item[0]=result[i]['tpep_pickup_datetime']
+			item[1]=item[0].slice(14,16);
+			item[2]=parseInt(item[1])
+			item[3]=result[i]['passenger_count'];
+			item[4]=parseInt(item[3]);
+			item[5]=result[i]['trip_distance'];
+			item[6]=parseInt(item[5]);
+			item[7]=result[i]["fare_amount"];
+			item[8]=parseInt(item[7]);
+			item[9]=result[i]['tip_amount'];
+			item[10]=parseInt(item[9]);
+			newdata[i]=item;
+		}
+		console.log(newdata)
+		newdata.sort(function(pos1,pos2){return pos1[1] - pos2[1]});
+		console.log(newdata.sort)
+		
+		plotchart(newdata);
+	
+	
+	})
+	}
+function getthedata3(){
+	console.log("Here we go get the data...");
+
+	$("#output3").html("<b>hi there</b>");
+
+	$.getJSON('https://data.cityofnewyork.us/resource/2upf-qytp.json',function(datas){
+		console.log(datas)
+		
+		let newdata1=[]
+		for(let i=0; i<datas.length;i++){
+			let item=[]
+			item[0]=datas[i]['tpep_pickup_datetime']
+			item[1]=item[0].slice(14,16);
+			item[2]=parseInt(item[1])
+			item[3]=datas[i]['passenger_count'];
+			item[4]=parseInt(item[3]);
+			item[5]=datas[i]['trip_distance'];
+			item[6]=parseInt(item[5]);
+			item[7]=datas[i]["fare_amount"];
+			item[8]=parseInt(item[7]);
+			item[9]=datas[i]['tip_amount'];
+			item[10]=parseInt(item[9]);
+			newdata1[i]=item;
+		}
+		console.log(newdata1)
+		newdata1.sort(function(pos1,pos2){return pos1[1] - pos2[1]});
+		console.log(newdata1.sort)
+		api2(newdata1)
+	})
+}
+
+
+function plotthechart(data){
+	let totaltip=0;
+
+
+for (let i=0;i<310;i++){
+totaltip=totaltip+data[i][10];
+}
+let avgtip=totaltip/309;
+
+
+let totalfare=0;
+for (let i=0;i<310;i++){
+totalfare=totalfare+data[i][8];
+}
+let avgfare=totalfare/309;
+
+let totaldistance=0;
+for (let i=0; i<310;i++){
+	totaldistance=totaldistance+data[i][6]
+}
+let avgdistance= totaldistance/309;
+
+console.log(avgtip)
+console.log(avgfare)
+
+let imageurl = "https://image-charts.com/chart?"
+	imageurl = imageurl + "chco=ff5555|e7a4e4|b2dffb|ffc55c|bbc55c&"
+	imageurl = imageurl + "chd=t:" + avgtip + "," + avgfare + "," + avgdistance +"&"
+	imageurl = imageurl + "chs=700x700&"
+	imageurl = imageurl + "cht=bvs&"
+	imageurl = imageurl + "chl=" + '$'+ avgtip.toFixed(2) + "|" + '$' + avgfare.toFixed(2) + "|" + avgdistance.toFixed(2) + ' Miles'+ "&"
+	imageurl = imageurl + "chxl=1:|" + 'Average Tip' + "|" +  'Average Fare'  + "|" +  'Average Distance'  +"&"
+	imageurl = imageurl + "chxt=y,x"+'&'
+	imageurl = imageurl + "chbr=20" ;
+
+	console.log(imageurl);
+
+	$("#output").html("<img src='" + imageurl + "'>"); 
+
+
+	
+}
+
+
+
+
+
+function plotchart(data){
+	let totaltip=0;
+	let totaltip1=0;
+
+
+for (let i=0;i<310;i++){
+totaltip=totaltip+data[i][10];
+}
+let avgtip=totaltip/309;
+
+for (let i=0;i<310;i++){
+totaltip=totaltip+data[i][10];
+}
+let avgtip1=totaltip1/309;
+
+let totalfare=0;
+for (let i=0;i<310;i++){
+totalfare=totalfare+data[i][8];
+}
+let avgfare=totalfare/309;
+
+let totaldistance=0;
+for (let i=0; i<310;i++){
+	totaldistance=totaldistance+data[i][6]
+}
+
+
+let avgdistance= totaldistance/309;
+
+	let image = "https://image-charts.com/chart?cht=p3&";
+	image = image + "chs=700x700&";
+	image = image + "chd=t:" + totaltip + "," + totalfare + "," + totaldistance + "&";
+	image = image + "chl=" + '$' + totaltip.toFixed(2) + ' In Tips' +  "|" + '$' + totalfare.toFixed(2)+ ' In Fare'  + "|" + totaldistance.toFixed(0) +' Miles' + "&";
+	image = image + "chlps=font.size,32";
+
+	console.log(image); 
+
+
+	
+	$("#output2").html("<img src='" + image + "'>");  
+	
+}
+
+
+	
+function api2(data){
+	
+	let totaltip1=0;
+
+	for (let i=0;i<329;i++){
+totaltip1=totaltip1+data[i][10];
+}
+let avgtip1=totaltip1/328;
+
+let totalfare1=0;
+for (let i=0;i<329;i++){
+totalfare1=totalfare1+data[i][8];
+}
+let avgfare1=totalfare1/328;
+
+let totaldistance1=0;
+for (let i=0; i<329;i++){
+	totaldistance1=totaldistance1+data[i][6]
+}
+let avgdistance1= totaldistance1/328;
+
+
+
+let imageurl1 = "https://image-charts.com/chart?"
+	imageurl1 = imageurl1 + "chco=ff5555|e7a4e4|b2dffb|ffc55c|bbc55c&"
+	imageurl1 = imageurl1 + "chd=t:" + avgtip1 + "," + avgfare1 + "," + avgdistance1 +"&"
+	imageurl1 = imageurl1 + "chs=700x700&"
+	imageurl1 = imageurl1 + "cht=bvs&"
+	imageurl1 = imageurl1 + "chl=" +  '$'+ avgtip1.toFixed(2) +  "|"  +'$' + avgfare1.toFixed(2) + "|" + avgdistance1.toFixed(2) + 'Miles'+ "&"
+	imageurl1 = imageurl1 + "chxl=1:|" + 'Average Tip' + "|" +  'Average Fare'  + "|" +  'Average Distance'  +"&"
+	imageurl1 = imageurl1 + "chxt=y,x"+'&'
+	imageurl1 = imageurl1 + "chbr=20" ;
+
+	console.log(imageurl1);
+
+	$("#output3").html("<img src='" + imageurl1 + "'>"); 
+
+	
+
+}
+
+
+
+
+
+
+//click event handlers
+
+
+$('#btn_1').click(function(){
+	getTheData();
+	
+})
+$('#btn_2').click(function(){
+	getTheData2();
+	
+})
+$('#btn_3').click(function(){
+	getthedata3();
+	
+})
+</script>
+</html>
